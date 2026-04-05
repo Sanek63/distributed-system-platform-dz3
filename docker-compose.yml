@@ -1,0 +1,50 @@
+services:
+  node1:
+    build: .
+    container_name: raft-node1
+    environment:
+      NODE_ID: node1
+      PEERS: http://node2:8000,http://node3:8000
+      ELECTION_TIMEOUT_MIN_MS: 300
+      ELECTION_TIMEOUT_MAX_MS: 600
+      HEARTBEAT_INTERVAL_MS: 100
+      STATE_FILE: /data/state.json
+    volumes:
+      - node1-data:/data
+    ports:
+      - "8001:8000"
+
+  node2:
+    build: .
+    container_name: raft-node2
+    environment:
+      NODE_ID: node2
+      PEERS: http://node1:8000,http://node3:8000
+      ELECTION_TIMEOUT_MIN_MS: 300
+      ELECTION_TIMEOUT_MAX_MS: 600
+      HEARTBEAT_INTERVAL_MS: 100
+      STATE_FILE: /data/state.json
+    volumes:
+      - node2-data:/data
+    ports:
+      - "8002:8000"
+
+  node3:
+    build: .
+    container_name: raft-node3
+    environment:
+      NODE_ID: node3
+      PEERS: http://node1:8000,http://node2:8000
+      ELECTION_TIMEOUT_MIN_MS: 300
+      ELECTION_TIMEOUT_MAX_MS: 600
+      HEARTBEAT_INTERVAL_MS: 100
+      STATE_FILE: /data/state.json
+    volumes:
+      - node3-data:/data
+    ports:
+      - "8003:8000"
+
+volumes:
+  node1-data:
+  node2-data:
+  node3-data:
