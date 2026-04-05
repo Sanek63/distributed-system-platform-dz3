@@ -348,7 +348,6 @@ class RaftNode:
             self.log.append(entry)
             entry_index = len(self.log) - 1
             self._persist_state()
-            self.match_index[self.node_id] = entry_index
 
         deadline = time.monotonic() + 3.0
         while time.monotonic() < deadline:

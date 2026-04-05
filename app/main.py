@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
@@ -25,18 +27,19 @@ class AppendEntriesRequest(BaseModel):
     leaderCommit: int
 
 
-app = FastAPI(title="Raft Node")
 node = RaftNode()
 
 
-@app.on_event("startup")
-async def startup() -> None:
+@asynccontextmanager
+async def lifespan(_: FastAPI):
     await node.start()
+    try:
+        yield
+    finally:
+        await node.stop()
 
 
-@app.on_event("shutdown")
-async def shutdown() -> None:
-    await node.stop()
+app = FastAPI(title="Raft Node", lifespan=lifespan)
 
 
 @app.get("/health")
