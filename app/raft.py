@@ -363,10 +363,11 @@ class RaftNode:
             await asyncio.sleep(self.heartbeat_interval_ms / 1000.0)
 
         async with self._lock:
+            self.log = self.log[:entry_index]
+            self._persist_state()
             return {
-                "accepted": True,
-                "committed": self.commit_index >= entry_index,
-                "index": entry_index,
+                "accepted": False,
+                "reason": "quorum_not_reached",
                 "term": self.current_term,
             }
 
