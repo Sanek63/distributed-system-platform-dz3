@@ -224,6 +224,7 @@ class RaftNode:
                     return True
 
                 self.next_index[peer] = max(0, next_index - 1)
+                return False
 
     async def _replicate_to_all(self) -> None:
         tasks = [self._send_append_entries(peer) for peer in self.peers]
