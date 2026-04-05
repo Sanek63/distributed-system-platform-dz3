@@ -217,14 +217,13 @@ class RaftNode:
                     return False
 
                 if data.get("success"):
-                    match_index = data.get("matchIndex", prev_log_index)
+                    match_index = data.get("matchIndex", prev_log_index + len(entries))
                     self.match_index[peer] = match_index
                     self.next_index[peer] = match_index + 1
                     self._advance_commit_index()
                     return True
 
                 self.next_index[peer] = max(0, next_index - 1)
-                return False
 
     async def _replicate_to_all(self) -> None:
         tasks = [self._send_append_entries(peer) for peer in self.peers]

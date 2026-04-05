@@ -1,6 +1,7 @@
 import argparse
 import json
 import urllib.error
+from urllib.parse import urlparse
 import urllib.request
 
 
@@ -28,6 +29,23 @@ def get_json(url: str) -> tuple[int, dict | str]:
             return resp.status, json.loads(body)
     except Exception as e:
         return 0, str(e)
+
+
+def leader_hint_to_url(leader_id: str, nodes: list[str]) -> str | None:
+    mapping = {
+        "node1": "localhost:8001",
+        "node2": "localhost:8002",
+        "node3": "localhost:8003",
+    }
+    target_hostport = mapping.get(leader_id)
+    if not target_hostport:
+        return None
+
+    for node in nodes:
+        parsed = urlparse(node)
+        if parsed.netloc == target_hostport:
+            return node
+    return None
 
 
 def main() -> None:
@@ -61,7 +79,7 @@ def main() -> None:
                 if isinstance(body, dict):
                     detail = body.get("detail", {})
                     if isinstance(detail, dict) and detail.get("leaderId"):
-                        leader_hint = next((n for n in nodes if detail["leaderId"] in n), None)
+                        leader_hint = leader_hint_to_url(detail["leaderId"], nodes)
             leader_hint = None
         raise SystemExit("Command failed on all nodes")
 
